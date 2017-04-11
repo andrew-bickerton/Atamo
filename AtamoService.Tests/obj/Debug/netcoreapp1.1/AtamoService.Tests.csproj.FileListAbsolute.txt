@@ -1,0 +1,13 @@
+/home/syphtor/Dev/Atamo/AtamoService.Tests/bin/Debug/netcoreapp1.1/xunit.runner.visualstudio.dotnetcore.testadapter.dll
+/home/syphtor/Dev/Atamo/AtamoService.Tests/bin/Debug/netcoreapp1.1/xunit.runner.utility.netstandard15.dll
+/home/syphtor/Dev/Atamo/AtamoService.Tests/bin/Debug/netcoreapp1.1/xunit.runner.reporters.netstandard15.dll
+/home/syphtor/Dev/Atamo/AtamoService.Tests/bin/Debug/netcoreapp1.1/AtamoService.Tests.deps.json
+/home/syphtor/Dev/Atamo/AtamoService.Tests/bin/Debug/netcoreapp1.1/AtamoService.Tests.runtimeconfig.json
+/home/syphtor/Dev/Atamo/AtamoService.Tests/bin/Debug/netcoreapp1.1/AtamoService.Tests.runtimeconfig.dev.json
+/home/syphtor/Dev/Atamo/AtamoService.Tests/bin/Debug/netcoreapp1.1/AtamoService.Tests.dll
+/home/syphtor/Dev/Atamo/AtamoService.Tests/bin/Debug/netcoreapp1.1/AtamoService.Tests.pdb
+/home/syphtor/Dev/Atamo/AtamoService.Tests/bin/Debug/netcoreapp1.1/AtamoService.dll
+/home/syphtor/Dev/Atamo/AtamoService.Tests/bin/Debug/netcoreapp1.1/AtamoService.pdb
+/home/syphtor/Dev/Atamo/AtamoService.Tests/obj/Debug/netcoreapp1.1/AtamoService.Tests.AssemblyInfo.cs
+/home/syphtor/Dev/Atamo/AtamoService.Tests/obj/Debug/netcoreapp1.1/AtamoService.Tests.dll
+/home/syphtor/Dev/Atamo/AtamoService.Tests/obj/Debug/netcoreapp1.1/AtamoService.Tests.pdb

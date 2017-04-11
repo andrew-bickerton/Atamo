@@ -1,0 +1,6 @@
+/home/syphtor/Dev/Atamo/AtamoService/bin/Debug/netstandard1.4/AtamoService.deps.json
+/home/syphtor/Dev/Atamo/AtamoService/bin/Debug/netstandard1.4/AtamoService.dll
+/home/syphtor/Dev/Atamo/AtamoService/bin/Debug/netstandard1.4/AtamoService.pdb
+/home/syphtor/Dev/Atamo/AtamoService/obj/Debug/netstandard1.4/AtamoService.AssemblyInfo.cs
+/home/syphtor/Dev/Atamo/AtamoService/obj/Debug/netstandard1.4/AtamoService.dll
+/home/syphtor/Dev/Atamo/AtamoService/obj/Debug/netstandard1.4/AtamoService.pdb
