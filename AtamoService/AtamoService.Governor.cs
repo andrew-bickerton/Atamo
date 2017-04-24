@@ -1,15 +1,16 @@
 ﻿using System;
 
-namespace Atamo.Service
+namespace Atamo
 {
-    public class AtamoService
+    public class ServiceD
     {
         public bool IsPrime(int candidate) 
         {
             if (candidate == 1) 
             { 
                 return false;
-            }                                                                                                                                                                                                                                                                                                     row new NotImplementedException("Please create a test first");
+            }                                                                                                                                                                                                                                                                                                     
+            throw new NotImplementedException("Please create a test first");
         } 
     }
 }

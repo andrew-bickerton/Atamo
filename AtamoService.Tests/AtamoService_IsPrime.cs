@@ -1,15 +1,15 @@
 using Xunit;
-using Atamo.Service;
+using Atamo;
 
 namespace Atamo.UnitTests.Service
 {
     public class AtamoService_IsPrimeShould
     {
-        private readonly AtamoService _primeService;
+        private readonly ServiceD _primeService;
 
         public AtamoService_IsPrimeShould()
         {
-            _primeService = new AtamoService();
+            _primeService = new ServiceD();
         }
 
         [Fact]
