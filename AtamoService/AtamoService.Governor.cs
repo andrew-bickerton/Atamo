@@ -9,8 +9,7 @@ namespace Atamo.Service
             if (candidate == 1) 
             { 
                 return false;
-            } 
-            throw new NotImplementedException("Please create a test first");
+            }                                                                                                                                                                                                                                                                                                     row new NotImplementedException("Please create a test first");
         } 
     }
 }
