@@ -1,0 +1,8 @@
+/home/syphtor/Dev/trial/bin/Debug/netcoreapp1.1/trial.deps.json
+/home/syphtor/Dev/trial/bin/Debug/netcoreapp1.1/trial.runtimeconfig.json
+/home/syphtor/Dev/trial/bin/Debug/netcoreapp1.1/trial.runtimeconfig.dev.json
+/home/syphtor/Dev/trial/bin/Debug/netcoreapp1.1/trial.dll
+/home/syphtor/Dev/trial/bin/Debug/netcoreapp1.1/trial.pdb
+/home/syphtor/Dev/trial/obj/Debug/netcoreapp1.1/trial.AssemblyInfo.cs
+/home/syphtor/Dev/trial/obj/Debug/netcoreapp1.1/trial.dll
+/home/syphtor/Dev/trial/obj/Debug/netcoreapp1.1/trial.pdb
