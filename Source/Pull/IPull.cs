@@ -6,9 +6,9 @@ namespace trial.Source.Pull
 {
     public interface IPull : ISource
     {
-        int Pull();
-        int Pull(int MaxToPull);
-        int Pull(int StartPosition, int MaxToPull);
+        IPosition Pull();
+        IPosition Pull(int MaxToPull);
+        IPosition Pull(IPosition StartPosition, int MaxToPull, bool OverrideLastPosition = false);
     }
     
 }

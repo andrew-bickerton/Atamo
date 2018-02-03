@@ -1,5 +1,6 @@
 using System;
 using trial.Source.Pull;
+using trial.Source;
 
 namespace trial.Source.Pull
 {
@@ -24,25 +25,25 @@ namespace trial.Source.Pull
             return _TestPull;
         }
 
-        public int Pull()
+        public IPosition Pull()
         {
             // dummy call to pull the latest entries from the text file
             _TestPull = "Full Pull";
-            return 1;
+            return new RowNumber(1);
         }
 
-        public int Pull(int MaxToPull)
+        public IPosition Pull(int MaxToPull)
         {
             // dummy call to pull the latest entries from the text file
             _TestPull = "Partial Pull at end";
-            return 1;
+            return new RowNumber(1);
         }
 
-        public int Pull(int startPosition, int MaxToPull)
+        public IPosition Pull(IPosition startPosition, int MaxToPull, bool OverrideLastPosition = false)
         {
             // dummy call to pull the latest entries from the text file
             _TestPull = "Partial Pull at position";
-            return 1;
+            return new RowNumber(1);
         }
 
         public TextFile (string Name, string Key)
