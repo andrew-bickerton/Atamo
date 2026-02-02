@@ -1,195 +1,136 @@
 # And Then A Miracle Occurs (Atamo)
 
-## Overview (what is it?)
+## Overview
 
-The idea behind this project is to create an auditable, pluggable, self-hostable service to support asynchronous processing of messages, they can be:
+Atamo is an auditable, pluggable, self-hostable service designed to support asynchronous processing of messages. It provides flexibility for both unidirectional and bidirectional message flows:
 
-- unidirectional: client sends message into Atamo. Agents then receive those events to do things with.
-- bidirectional: client sends a request message into Atamo and receives a requestid back. As agents process and respond to the request, their responses are made available to be picked up by the client.
+- **Unidirectional**: Clients send messages into Atamo, and agents process these events.
+- **Bidirectional**: Clients send a request message and receive a `requestId`. Agents process the request, and their responses are made available for the client to retrieve.
 
-Messages are routed to agents based off rules applied by configuration providers.
+### Key Features
 
-A single message can be routed to multiple agents for actioning.
+- **Message Routing**: Messages are routed to agents based on configurable rules.
+- **Auditing**: Tracks the entire lifecycle of a message, including its origin, routing, and processing.
+- **Extensibility**: Every component of Atamo is extendable with default implementations provided.
+- **Versatility**: Can be used as:
+  - A library for asynchronous, multi-threaded processing.
+  - A RESTful API for rule-driven event processing.
+  - A user-driven agentic interface.
 
-All paths that a message takes (which client posted it, configuration rules that evaluated it for routing, agent assigned message, etc..) will be communicated to auditor and optionally back to client.
+---
 
-Every element of Atamo should be extendable with reasonable intial default implementations.
+## Use Cases
 
-Atamo can be used:
+### Primary Use Cases
 
-- inside a project to support asynchronous multi threaded processing 
-- as a restful api service to support rule driven event processing
-- or even as a user driven agentic interface
+1. **Log Events**:
+   - Rules determine which actions fire based on the event.
+   - Sub-cases:
+     - **Fire and Forget**: Controller monitors state/failures; the client does not maintain a connection.
+     - **Fire and Monitor**: Both the controller and client receive telemetry about the event and actions.
 
-## dump of notes
+2. **Request and Response**:
+   - Retrieve details from multiple sources and return them to the requestor.
+   - Sub-cases:
+     - **Semi-Static Data**: Client disconnects after receiving the initial response.
+     - **Live Updates**: Client remains connected to receive updates.
+     - **Deferred Retrieval**: Client sends a request and checks back later for results.
 
+---
 
+## Components
 
-Next set of sub pages would become the user documentation for how to interact with Atamo.Hub (the user being a programmer hooking into the API.
+### Core Components
 
+1. **Hub**:
+   - Central engine where all settings are applied.
+   - Interfaces:
+     - `ITelemetry`: Notifies the controller and client about hub activity.
+     - `IResponse`: Handles client-specific responses.
+     - `IHubControl`: Interface for the controller to interact with the hub.
+     - `IHubReceiver`: Interface for clients to submit requests.
 
+2. **Controller**:
+   - Hosts the hub and manages agents, event providers, and configuration providers.
+   - Monitors hub state and performance, providing telemetry for auditing and alerting.
 
-Sections required:
+3. **Event Providers**:
+   - Interface for clients to interact with the hub.
+   - Responsibilities:
+     - Register new event types.
+     - Package and submit event messages.
+     - Manage client responses, including support for disconnected clients.
 
-	• Overview (describe in general terms what it does)
+4. **Agents**:
+   - Perform actions such as sending emails or calling APIs.
+   - Can be generic, with metadata defining their behavior (e.g., REST API calls, database operations).
 
-		○ Primary use cases
+5. **Configuration Providers**:
+   - Define rules for routing events to agents.
+   - Default provider links event types and users to agents.
+   - Custom providers can implement complex rules.
 
-			§ Log event and rules will work out what [n] actions will fire because of that event (user/team/organisational level of rules)
+6. **Configuration Rules**:
+   - Link requests/events to actions.
+   - Define metadata for filtering, agent selection, and action message creation.
 
-				□ Sub case 1: Fire and forget (this is the primary one - Controller gets info about state/failures - client does not need to maintain connection to Hub)
+7. **Users**:
+   - Each user has tokens for agent providers.
+   - Supports group management for shared configuration rules.
 
-				□ Sub case 2: Fire and monitor (as well as the Controller receiving telemetry on where the EventMessage is and details about the Actions fired, the Client can also receive/retrieve these details) 
+---
 
-			§ Request a response/search on generic RequestType - retrieves details from multiple sources and feeds it back to requestor(s) - includes caching and disconnected requestor
+## Guides
 
-				□ Sub case 1: load/search semi-static data - once retrieved client is disconnected from Hub
+### Getting Started
 
-				□ Sub case 2: load/search and receive updates - initial load given to client, connection remains open as client receives updates. (either client disconnects or all Agents involved in feed terminate feed)
+1. **Add Atamo to a WinForms App**:
+   - Implement the controller to manage the hub.
 
-				□ Sub case 3: client sends request in and then comes back later to check on result
+2. **Make Data Loading Asynchronous**:
+   - Create an agent to handle requests.
+   - Display telemetry received by the controller.
 
-					® Should this be part of the event provider? It could be a cache layer wrapped around the core hub as an additional service, if there is a shared request guid to check back on, they hold the results in blob storage external to the primary system
+3. **Load Data from Multiple Sources**:
+   - Configure multiple agents to handle the same request.
 
-					® Maintain a keep alive time setting before clearing the data from the hub? 
+4. **Set Up a Data Feed**:
+   - Modify an agent to provide continuous updates.
+   - Allow clients to disconnect when no longer interested in results.
 
-		○ How it can be used:
+5. **Log an Event**:
+   - Register an event type and observe its behavior.
 
-			§ Stateless - Inside a winforms app to aid in making it multi-threaded/more responsive
+6. **Configure Actions**:
+   - Add actions to agents and configure them to fire when events occur.
 
-			§ Stateful web/service - to guarantee that actions will be dealt with
+7. **Handle Failures**:
+   - Simulate agent failures and demonstrate retry attempts.
+   - Configure alerts for retries exceeding thresholds.
 
-		○ Components:
+8. **Create Custom Configuration Providers**:
+   - Implement a provider for complex rules and test it at runtime.
 
-			§ Hub : central engine (all settings are applied via the Hub)
+---
 
-				□ Itelemetry - interface to notify Controller and Client what's happening inside the hub
+## Advanced Features
 
-				□ IResponse - how to feedback to client it's specific responses to request
+### Extensibility
 
-				□ IHubControl - interface controller talk to hub through
+- Users can submit their own mapping DLLs or configuration rules.
+- Strict auditing and permission handling ensure security.
+- Mocking and testing tools are built-in to verify new rules and components.
 
-				□ IHubReceiver - interface client will submit requests through
+### Caching
 
-			§ Controller: single controller that hosts the hub
+- Two levels of caching:
+  1. Event provider cache for disconnected clients.
+  2. Hub agent manager cache to optimize repeated requests.
 
-				□ this controls registering of agents, event providers and configuration providers
+---
 
-				□ Receives telemetry from the hub for audit, performance and state recording purposes
+## Future Enhancements
 
-				□ Manages if this is a stateless or stateful hub
-
-				□ Monitoring of hub state can be done via the hub
-
-					® Alert on latency
-
-					® Alert on performance issues
-
-					® Monitor throughout
-
-					® ...
-
-			§ EventProviders: provides a natural interface to the clients
-
-				□ registers new event types on the hub
-
-				□ packages the event messages for submission to the hub
-
-				□ Manages any responses to the client, including support for disconnected clients
-
-			§ EventTypes : collection of event types that the Hub can receive
-
-				□ Event types register with an event message template (used to build the action msg)
-
-				□ The hub uses event type & originating user to filter which config rules fire
-
-			§ ActionTypes : collection of possible actions that can be done (by multiple Agents)
-
-			§ Agents : the components that do the work of talking to an external point, impersonating a particular user to do an 'action' (ie: send email)
-
-				□ Can be generic agents where agent meta data provides destination details ie: call restful webpage (meta = base Web address, action = folders/params)
-
-				□ Call stored proc (meta = Sql conn string and sp name, action = params)
-
-				□ So register of an agent includes dll location, init meta data, action template
-
-			§ Configuration providers: default is only one basic provider that links event type & user to an agent (allows simple substitution in populating action template from the event msg - creates the action msg)
-
-				□ New configuration providers can be registered for certain event types/actions, allows more complex rules of when to fire actions and how to parse event msg to populate the action msg
-
-				□ When .evaluate called, returns a collection of action messages (default provider only returns 0 or 1 action message)
-
-			§ Configuration rule: link a request/event from a user to n actions
-
-				□ default provider only to allow 1 action per config rule, but multiple rules can match a single request/event
-
-				□ Rule holds meta data that provider will use with event msg to determine:
-
-					® Agents to fire
-
-					® Additional filtering
-
-					® Body of the action msg to send to the agent
-
-			§ Users
-
-				□ Each user has a list of tokens that can be used for each agent provider
-
-				□ Need to work out how to secure safely
-
-				□ Also need some form of group management so we can set a config rule for a group of users. The paying tenant perhaps?
-
-		○ Guides: include set of instructions on building/using the hub
-
-			i. Add hub to small win forms app
-
-				□ Implements the controller
-
-			ii. Make load of data asynch with form responsive
-
-				□ Create an agent and configure it to be responsible for a request
-
-				□ Show telemetry received by the controller
-
-			iii. Load data from multiple sources
-
-				□ Create a second agent and configure to fire with the same request
-
-			iv. Setup a feed of data
-
-				□ Modify 2nd agent to not complete request, instead send a continual feed of data
-
-				□ Also change client so that it disconnects when no longer wants the results
-
-			v. Log an event
-
-				□ Log an event type, at this stage it will do nothing
-
-			vi. Setup action to fire when event occurs
-
-				□ Add new action type to existing agent and configure to fire when event detected
-
-			vii. 2nd action to fire but fire with different user and different action message
-
-			viii. Failures:
-
-				□ Force a failure on one of the agents and show retry attempts
-
-				□ Show alerting when retries exceed attempts
-
-				□ Show how client can be configured to receive alerts from its events (or left to controller to handle)
-
-			ix. Create your own complex configuration rule provider (to do something more complex than just pass through)
-
-			
-
-	• Not sure if it was covered but we need a user can submit their own mapping DLL.
-
-		○ AB: a user can submit their own config rule via the hub using any of the loaded config providers, they can also submit their own config provider if more custom logic required
-
-			§ Will need to have auditing and strict permission handling on who can submit what
-
-			§ I think we should also build in a way to mock/test/verify new rules/components at runtime
-
-	• planning to have 2 levels of cache, 1 at the event provider allowing for disconnected clients. A second in the hub agent manager, where if we get multiple requests for the same data, we only need one call out to the agent/earlier feedback to client
-
+- Support for user-submitted configuration providers.
+- Enhanced auditing and runtime verification for custom rules.
+- Improved scalability for large-scale deployments.
