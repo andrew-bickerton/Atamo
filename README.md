@@ -1,42 +1,14 @@
+
 # And Then A Miracle Occurs (Atamo)
 
-## Overview
+## Project Overview
 
-Atamo is an auditable, pluggable, self-hostable service designed to support asynchronous processing of messages. It provides flexibility for both unidirectional and bidirectional message flows:
-
-- **Unidirectional**: Clients send messages into Atamo, and agents process these events.
-- **Bidirectional**: Clients send a request message and receive a `requestId`. Agents process the request, and their responses are made available for the client to retrieve.
-
-### Key Features
-
-- **Message Routing**: Messages are routed to agents based on configurable rules.
-- **Auditing**: Tracks the entire lifecycle of a message, including its origin, routing, and processing.
-- **Extensibility**: Every component of Atamo is extendable with default implementations provided.
-- **Versatility**: Can be used as:
-  - A library for asynchronous, multi-threaded processing.
-  - A RESTful API for rule-driven event processing.
-  - A user-driven agentic interface.
+See [docs/Overview.md](docs/Overview.md) for a detailed introduction, architecture, and primary use cases.
 
 ---
 
-## Use Cases
-
-### Primary Use Cases
-
-1. **Log Events**:
-   - Rules determine which actions fire based on the event.
-   - Sub-cases:
-     - **Fire and Forget**: Controller monitors state/failures; the client does not maintain a connection.
-     - **Fire and Monitor**: Both the controller and client receive telemetry about the event and actions.
-
-2. **Request and Response**:
-   - Retrieve details from multiple sources and return them to the requestor.
-   - Sub-cases:
-     - **Semi-Static Data**: Client disconnects after receiving the initial response.
-     - **Live Updates**: Client remains connected to receive updates.
-     - **Deferred Retrieval**: Client sends a request and checks back later for results.
-
----
+# Quick Start
+...existing content...
 
 ## Components
 

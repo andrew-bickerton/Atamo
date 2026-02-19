@@ -1,0 +1,39 @@
+# Ignore build outputs
+bin/
+obj/
+**/bin/
+**/obj/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Rider / IDE
+.idea/
+.vscode/
+
+# NuGet
+*.nupkg
+packages/
+.nuget/
+
+# Test results / coverage
+TestResults/
+coverage.cobertura.xml
+coverage.opencover.xml
+coverage.*
+*.coverage
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Misc
+*.db
+*.bak
