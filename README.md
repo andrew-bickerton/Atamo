@@ -8,9 +8,9 @@ ATAMO is a library (with an optional standalone service host) for .NET applicati
 
 ## Status
 
-🚧 **Early design. No production code yet.**
+🚧 **Early design. Initial scaffolding only — no substantive code yet.**
 
-This repository is a 2026 reboot of an earlier 2015 effort. The current focus is design documentation, ADRs, and a first working sample. The public API is not yet stable and should not be considered usable. CI is wired for .NET 9 and will exercise `dotnet restore` / `build` / `test` once the first project lands.
+This repository is a 2026 reboot of an earlier 2015 effort. The solution layout was committed in [ADR 0004](docs/adr/0004-initial-project-layout.md) (`Atamo.Abstractions` + `Atamo` + `Atamo.Tests`, with central package management and `Directory.Build.props` carrying shared settings). `dotnet restore`, `dotnet build`, and `dotnet test` all succeed against the scaffold, but no contracts or default implementations have landed inside the projects yet — that work begins with the next milestone, and the public API should not be considered usable.
 
 If you are returning from the 2015 codebase, the component vocabulary has changed — see [ADR 0001](docs/adr/0001-rename-2015-vocabulary.md) for the rename map (Controller → Host, EventProvider → Source, ConfigurationProvider → Routing rule provider, etc.). The legacy design lives under [`docs/OldVersion/`](docs/OldVersion/) for reference and is no longer authoritative.
 
@@ -69,7 +69,7 @@ The authoritative design lives under [`docs/`](docs/):
 
 ## Building
 
-Once code lands, the canonical commands match the CI workflow ([`.github/workflows/dotnet-ci.yml`](.github/workflows/dotnet-ci.yml)):
+The canonical commands match the CI workflow ([`.github/workflows/dotnet-ci.yml`](.github/workflows/dotnet-ci.yml)):
 
 ```bash
 dotnet restore
@@ -77,7 +77,7 @@ dotnet build --configuration Release
 dotnet test  --configuration Release /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=./TestResults/
 ```
 
-Target framework: **.NET 9.0**. There are no `.csproj` or `.sln` files yet — they will arrive with the first scaffolding work.
+Target framework: **.NET 9.0**. The scaffolding currently restores, builds, and tests cleanly with one passing smoke test; substantive code lands in subsequent milestones.
 
 ## Contributing
 

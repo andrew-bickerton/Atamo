@@ -4,13 +4,23 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository status
 
-ATAMO is in **pure design phase**. There is no production code yet:
+ATAMO is **early design with initial scaffolding in place**. The 2026 reboot of an earlier 2015 effort.
 
-- `src/` is empty — no `.csproj` or `.sln` files exist.
-- `tests/Atamo.Tests/` is an empty directory placeholder.
-- The CI pipeline (`.github/workflows/dotnet-ci.yml`) targets .NET 9 and runs `dotnet restore` / `build` / `test`, but those commands have nothing to operate on until a project lands.
+The solution layout (per [ADR 0004](docs/adr/0004-initial-project-layout.md)):
 
-This is a 2026 reboot of an earlier 2015 effort. Most of the work right now is design docs and ADRs; once code starts landing, the design docs are the authoritative spec for what the code should look like.
+- [`src/Atamo.Abstractions/`](src/Atamo.Abstractions/) — interfaces, message records, contracts. No logic yet.
+- [`src/Atamo/`](src/Atamo/) — default implementations + fluent builder API. No logic yet; references `Atamo.Abstractions`.
+- [`tests/Atamo.Tests/`](tests/Atamo.Tests/) — xUnit. Currently holds a single passing smoke test (`SmokeTests.TestInfrastructure_Runs`) so `dotnet test` has something to run.
+- [`samples/Atamo.Samples.Hello/`](samples/Atamo.Samples.Hello/) — minimal console app referenced by [.vscode/launch.json](.vscode/launch.json). Scope is intentionally limited to verifying the toolchain (F5 in VS Code, `dotnet run`); it is **not** a usage sample. The v0 usage sample remains the email-triage scenario in `docs/design/first-sample.md`. ADR 0004 originally deferred all samples; this one was added later as a tooling-verification target only and should be removed or supplanted when the email-triage sample lands.
+
+Cross-cutting infrastructure at the repo root:
+
+- [`Directory.Build.props`](Directory.Build.props) — single source of truth for `TargetFramework=net9.0`, nullable, implicit usings, `TreatWarningsAsErrors=true`. Per-project `.csproj` files stay minimal.
+- [`Directory.Packages.props`](Directory.Packages.props) — central package management. All NuGet versions live here; `<PackageReference>` entries omit `Version=`.
+- [`NuGet.config`](NuGet.config) — declares `nuget.org` as the only feed, so restore is reproducible regardless of the developer's global config.
+- [`.editorconfig`](.editorconfig) — C# style rules (file-scoped namespaces, usings outside namespace, etc.).
+
+Most of the work is still design docs and ADRs. Code beyond the scaffolding has not landed yet; the design docs are the authoritative spec for what it should look like.
 
 ## Authoritative documentation
 

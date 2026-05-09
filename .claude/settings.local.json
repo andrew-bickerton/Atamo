@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(dotnet --version)",
+      "PowerShell(dotnet new sln --name Atamo)",
+      "PowerShell(dotnet new classlib --name Atamo --output src/Atamo --framework net9.0)",
+      "PowerShell(dotnet new xunit --name Atamo.Tests --output tests/Atamo.Tests --framework net9.0)",
+      "PowerShell(dotnet sln Atamo.sln add src/Atamo.Abstractions/Atamo.Abstractions.csproj src/Atamo/Atamo.csproj tests/Atamo.Tests/Atamo.Tests.csproj)",
+      "PowerShell(dotnet restore)",
+      "PowerShell(dotnet nuget list source)",
+      "PowerShell(dotnet build --configuration Release --no-restore)",
+      "PowerShell(dotnet test --configuration Release --no-build)",
+      "PowerShell(dotnet test --no-build --configuration Release /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=./TestResults/)",
+      "PowerShell(dotnet new console --name Atamo.Samples.Hello --output samples/Atamo.Samples.Hello --framework net9.0)",
+      "PowerShell(dotnet sln Atamo.sln add samples/Atamo.Samples.Hello/Atamo.Samples.Hello.csproj)",
+      "PowerShell(dotnet build --configuration Debug)",
+      "PowerShell(dotnet run --project samples/Atamo.Samples.Hello --no-build)",
+      "PowerShell(dotnet build --configuration Release)",
+      "Bash(git check-ignore *)"
+    ]
+  }
+}
