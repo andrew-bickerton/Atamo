@@ -61,6 +61,7 @@ Concrete examples of what fits this shape:
 - [Third sample](docs/design/third-sample.md) — disconnected human-review agent, building on v1
 - [Principles](docs/design/principles.md) — design rules the codebase should hold itself to
 - [Open questions](docs/design/open-questions.md) — decisions still in flight
+- [Critique](docs/design/critique.md) — register of concerns about the design and the project around it
 - [ADRs](docs/adr/) — architectural decisions, dated and numbered
 
 ## Contributing
