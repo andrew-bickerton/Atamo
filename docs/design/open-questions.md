@@ -9,6 +9,8 @@ These are decisions that have been deliberately deferred. Each is recorded here 
 - [Credential vault strategy](#credential-vault-strategy)
 - [Two-level cache implementation](#two-level-cache-implementation)
 - [Governor storage and general persistence — same store?](#governor-storage-and-general-persistence--same-store)
+- [In-flight tracking query interface](#in-flight-tracking-query-interface)
+- [Deferred-retrieval keep-alive and TTL](#deferred-retrieval-keep-alive-and-ttl)
 - [Resumability semantics for the history-then-live pattern](#resumability-semantics-for-the-history-then-live-pattern)
 - [Inbox policy scope for v0](#inbox-policy-scope-for-v0)
 - [Inbox cancellation and shutdown semantics](#inbox-cancellation-and-shutdown-semantics)
@@ -17,6 +19,7 @@ These are decisions that have been deliberately deferred. Each is recorded here 
 - [Wire protocol for the standalone host](#wire-protocol-for-the-standalone-host)
 - [Persistence layer choice](#persistence-layer-choice)
 - [How ATAMO interacts with existing buses when one is present](#how-atamo-interacts-with-existing-buses-when-one-is-present)
+- [Project layout and solution structure](#project-layout-and-solution-structure)
 
 ## How user-submitted code is isolated
 
@@ -61,9 +64,9 @@ The principle "compose, don't subsume" pulls hard toward integration rather than
 
 The 2015 design called for two caches: one at the message-source layer for disconnected clients, one inside the hub for in-flight request coalescing.
 
-The coalescing cache is straightforward: if two requests with the same key arrive while one is in flight, the second waits on the first. Standard pattern, easy to implement on top of `ConcurrentDictionary` and `TaskCompletionSource`.
+The coalescing cache is straightforward _to implement_: if two requests with the same key arrive while one is in flight, the second waits on the first. Standard pattern, on top of `ConcurrentDictionary` and `TaskCompletionSource`. The harder question is _when_ it lands. Neither v0 (single-LLM-call email triage) nor v1 (history-and-live review form) exercises it. The current bias is to defer until a real consumer requirement forces the question, in line with the "build one delightful path before generalising" principle. If it ships earlier as a "free" feature it almost certainly ships in the wrong shape. To be revisited when a third sample or a real consumer naturally produces duplicate in-flight requests for the same data.
 
-The disconnected-client cache is harder because it needs to outlive process restarts and have a configurable keep-alive. This overlaps significantly with the persistence swap point and may be subsumed by it. The decision is whether it is a separate concern or an aspect of persistence.
+The disconnected-client cache is harder because it needs to outlive process restarts and have a configurable keep-alive. This overlaps significantly with the persistence swap point and may be subsumed by it — see [Deferred-retrieval keep-alive and TTL](#deferred-retrieval-keep-alive-and-ttl) for the related TTL question. The decision is whether it is a separate concern or an aspect of persistence.
 
 ## Governor storage and general persistence — same store?
 
@@ -76,6 +79,32 @@ Candidates:
 - **Separate concerns entirely.** Each subsystem chooses its own store; query agents read from each separately. Most flexible, most complex.
 
 The first sample's message-store agent owning its own store (separate from the Governor's audit storage) settles a small version of this question (content storage is a consumer concern, queryable by the same agent that wrote it). The full answer for the substrate's own storage — Governor audit, inbox state, deferred-retrieval results — waits until deferred retrieval (scenario 3) and the inbox swap-point are both built out.
+
+## In-flight tracking query interface
+
+The Governor records every lifecycle event, so "which messages are currently in flight" is derivable from the audit log. The question is the _shape_ of that capability — what the operator-facing query interface looks like.
+
+Candidates:
+
+- **Fold the event stream on demand.** Every query reads the relevant slice of the audit log and computes current state. Simplest; no extra storage. Slow at scale; pushes the work to every consumer of the question.
+- **Maintain a denormalised "current state" view.** A separate table or projection updated as events arrive, indexed by principal, agent, message type, and stage. Fast to query; couples the Governor to a specific schema that has to evolve as the lifecycle grows. The standard read-model-over-event-log pattern.
+- **Expose only a streaming subscription.** Operators subscribe to live events and maintain their own view if they need one. Pushes the choice of materialisation to the consumer.
+
+Likely answer is "denormalised view, regenerable from the event log if it gets out of sync." But the contract — query parameters, indexed dimensions, freshness guarantees, what counts as "in flight" — needs to be settled deliberately. The 2015 design named this as a controller-facing capability ("maintain list of inflight messages") without specifying the interface; getting the interface right is what makes this a load-bearing feature rather than a nice-to-have.
+
+To be settled when the Governor's first concrete query surface lands, alongside or shortly after the v0 sample.
+
+## Deferred-retrieval keep-alive and TTL
+
+Vision scenario 3 (request with deferred retrieval) commits to "configurable keep-alive before they are evicted" but does not specify the policy. Several sub-questions need explicit answers:
+
+- **Default TTL.** What is the default keep-alive for a deferred-retrieval result? A few minutes? An hour? Until explicitly retrieved? The 2015 design called this out as configurable but did not propose a default.
+- **Granularity.** Is TTL set per-request by the source, per-message-type by configuration, globally by the host, or some combination?
+- **Behaviour on retrieval-after-eviction.** A client returns with a correlation ID whose results have aged out. Is this an error, a "results unavailable" sentinel, or "fall back to live wait if the request can be replayed"?
+- **Relationship with audit retention.** The Governor retains audit events for some period; the deferred-retrieval result store retains payloads for some period. These are different things with different lifetimes — the audit event for "this request was issued" can outlive the payload by orders of magnitude. Need to make the distinction explicit so consumers don't conflate them.
+- **Storage location.** Does the deferred-retrieval cache share storage with the inbox? With the Governor? With application-level persistence? Overlaps with the [Governor storage](#governor-storage-and-general-persistence--same-store) question.
+
+To be settled when scenario 3 (deferred retrieval) is built out — likely the third sample.
 
 ## Resumability semantics for the history-then-live pattern
 
@@ -155,3 +184,18 @@ SQLite is currently leading on grounds of "works without infrastructure," but Ma
 If a consumer brings Wolverine or MassTransit, ATAMO should compose with it cleanly rather than fighting it. The shape of that integration is undecided. Candidates: ATAMO uses the bus as its transport swap-out; ATAMO sits in front of the bus and delegates dispatch; ATAMO sits behind the bus as one consumer among many.
 
 Different consumers will want different shapes. The integration should probably support more than one mode, with the default being the simplest (transport swap-out).
+
+## Project layout and solution structure
+
+The 2015 design committed to a specific solution layout: `Atamo.Hub` (core library), `Atamo.SDK` (interfaces for agent and provider authors), `Atamo.Service` (standalone REST host), `Atamo.Persistence` (storage abstractions), `Atamo.Agents.Samples` (sample agent implementations). The 2026 design has not yet revisited that layout, and the moment the first `dotnet new` runs, whatever shape lands becomes de-facto architecture.
+
+Decisions to make before scaffolding:
+
+- **Where the public API lives.** Single `Atamo` package, or split into `Atamo.Abstractions` (interfaces) + `Atamo.Hub` (default implementations) + `Atamo.Hosting` (DI/registration glue), in line with current .NET conventions?
+- **Where swap-point implementations live.** Each non-default implementation (`Atamo.Inbox.RabbitMQ`, `Atamo.Persistence.Marten`, `Atamo.Governor.OpenTelemetry`) as its own NuGet package, so consumers pull only what they use? This is the dominant .NET pattern and almost certainly the right answer, but worth committing.
+- **Where the standalone host lives.** A separate executable project (`Atamo.Host` or `Atamo.Server`) that depends on the embedded library; not a separate codebase. Confirms the principle that the standalone host adds no primitives the embedded library does not have.
+- **Where samples live.** First-sample (email triage), second-sample (history-and-live), third-sample (disconnected human review) each as their own runnable project under a `samples/` directory? Mixed in with tests, or distinct?
+- **`Atamo.Agents.Common` companion package.** Reusable agent base classes and patterns (idempotency wrappers, retry envelopes, cancellation conventions) live here, _outside_ the core. The "core knows nothing about its use cases" principle keeps this out of the substrate; the "compose, don't subsume" principle keeps it from drifting toward "yet another framework." The package should be optional, separately versioned, and replaceable.
+- **Tests.** Unit, integration, and end-to-end tests mapped onto the project structure. Probably `tests/Atamo.Tests`, `tests/Atamo.IntegrationTests`, `tests/Atamo.SampleApp.Tests` or similar.
+
+This becomes an ADR (likely numbered 0004) the first time scaffolding is proposed. Until then, the question is recorded here so the decision is made deliberately rather than by accident.

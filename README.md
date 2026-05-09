@@ -1,108 +1,88 @@
+# ATAMO
 
-# And Then A Miracle Occurs (Atamo)
+**A .NET substrate for routing work to agents — human, code, or AI — with per-user identity and full auditability.**
 
-## Project Overview
+> _And Then A Miracle Occurs_
 
-See [docs/Overview.md](docs/Overview.md) for a detailed introduction, architecture, and primary use cases.
+ATAMO is a library (with an optional standalone service host) for .NET applications that need to route messages to one or more agents, collect their responses, and keep a full audit trail of what happened and why. It is designed to be embedded inside an existing application with sensible in-process defaults, and to scale up by swapping individual layers — transport, inbox, persistence, credential storage, agent runtime — when the application grows into them.
 
----
+## Status
 
-# Quick Start
-...existing content...
+🚧 **Early design. No production code yet.**
 
-## Components
+This repository is a 2026 reboot of an earlier 2015 effort. The current focus is design documentation, ADRs, and a first working sample. The public API is not yet stable and should not be considered usable. CI is wired for .NET 9 and will exercise `dotnet restore` / `build` / `test` once the first project lands.
 
-### Core Components
+If you are returning from the 2015 codebase, the component vocabulary has changed — see [ADR 0001](docs/adr/0001-rename-2015-vocabulary.md) for the rename map (Controller → Host, EventProvider → Source, ConfigurationProvider → Routing rule provider, etc.). The legacy design lives under [`docs/OldVersion/`](docs/OldVersion/) for reference and is no longer authoritative.
 
-1. **Hub**:
-   - Central engine where all settings are applied.
-   - Interfaces:
-     - `ITelemetry`: Notifies the controller and client about hub activity.
-     - `IResponse`: Handles client-specific responses.
-     - `IHubControl`: Interface for the controller to interact with the hub.
-     - `IHubReceiver`: Interface for clients to submit requests.
+## What ATAMO is for
 
-2. **Controller**:
-   - Hosts the hub and manages agents, event providers, and configuration providers.
-   - Monitors hub state and performance, providing telemetry for auditing and alerting.
+A developer using ATAMO can:
 
-3. **Event Providers**:
-   - Interface for clients to interact with the hub.
-   - Responsibilities:
-     - Register new event types.
-     - Package and submit event messages.
-     - Manage client responses, including support for disconnected clients.
+- Post a message into a hub and let it route to any number of registered agents — fire-and-forget, with retries and audit handled for them.
+- Post a request and receive a stream of responses back as agents work — including responses that themselves become messages other agents can react to.
+- Register agents that act on behalf of a specific user, with credentials and quotas scoped to that user.
+- Mix in-process agents with disconnected agents (humans, batch jobs, remote services) without changing how dispatch works.
+- Plug in their own routing rules, agents, and configuration providers without forking the core.
+- Observe everything that happens through a Governor layer with configurable audit depth.
 
-4. **Agents**:
-   - Perform actions such as sending emails or calling APIs.
-   - Can be generic, with metadata defining their behavior (e.g., REST API calls, database operations).
+## What ATAMO is not
 
-5. **Configuration Providers**:
-   - Define rules for routing events to agents.
-   - Default provider links event types and users to agents.
-   - Custom providers can implement complex rules.
+- **Not a message bus.** If you need an industrial-strength bus, use Wolverine, MassTransit, RabbitMQ, or NATS directly. ATAMO sits one layer above transport and is designed so you can swap its in-process default for one of those when the time comes.
+- **Not a workflow engine.** If you need durable, crash-safe long-running workflows, use Temporal, Dapr Workflows, or Azure Durable Functions. ATAMO can be hosted on top of those; it does not try to replace them.
+- **Not an LLM framework.** ATAMO's core knows nothing about LLMs. LLM routing is a use case built on top, not a feature of the substrate.
 
-6. **Configuration Rules**:
-   - Link requests/events to actions.
-   - Define metadata for filtering, agent selection, and action message creation.
+## Conceptual sketch
 
-7. **Users**:
-   - Each user has tokens for agent providers.
-   - Supports group management for shared configuration rules.
+```
+  ┌─────────────┐         ┌──────────────────────────────┐         ┌─────────────┐
+  │   Source    │ ──msg─▶ │             Hub              │ ──▶ inbox ──▶ Agent A │
+  │ (your app)  │         │  routing · streaming · audit │         │             │
+  │             │ ◀─resp─ │                              │ ──▶ inbox ──▶ Agent B │
+  └─────────────┘         └──────────────┬───────────────┘         └─────────────┘
+                                         │
+                                         ▼
+                                   ┌───────────┐
+                                   │ Governor  │  audit · policy · telemetry
+                                   └───────────┘
+```
 
----
+**Sources** push messages in. **Agents** pull messages out of their per-agent **inboxes** at their own pace. The **Hub** routes between them using **routing rule providers**. The **Governor** observes everything. Source and Agent are _roles_, not types — a single component can play one or both. Disconnection (humans, batch jobs, flaky networks) is a difference of degree, not kind: every agent has an inbox; only the consumption rate differs.
 
-## Guides
+Concrete shapes that fit:
 
-### Getting Started
+- An inbound email becomes a message; an LLM agent triages it; the response becomes a message; an outbound email agent sends the reply. A message-store agent silently records the content of every message that flows through.
+- A web request asks for a dashboard; three agents start streaming partial results back; the UI updates progressively as deltas arrive.
+- A flagged email lands in a human-review agent's inbox; a reviewer picks it up hours later; their decision flows back through the system as a normal message. The same audit trail covers the LLM's earlier processing and the human's later decision.
 
-1. **Add Atamo to a WinForms App**:
-   - Implement the controller to manage the hub.
+## Documentation
 
-2. **Make Data Loading Asynchronous**:
-   - Create an agent to handle requests.
-   - Display telemetry received by the controller.
+The authoritative design lives under [`docs/`](docs/):
 
-3. **Load Data from Multiple Sources**:
-   - Configure multiple agents to handle the same request.
+- [Documentation index](docs/README.md) — start here for the full map.
+- [Vision](docs/design/vision.md) — what ATAMO is, who it is for, what it deliberately is not.
+- [Architecture](docs/design/architecture.md) — high-level overview, with links to per-component detail in [`docs/design/components/`](docs/design/components/).
+- [Principles](docs/design/principles.md) — the rules the codebase holds itself to.
+- [Open questions](docs/design/open-questions.md) — decisions still in flight.
+- [ADRs](docs/adr/) — architectural decisions, dated and numbered.
+- [First sample](docs/design/first-sample.md) — the email-triage scenario that drives the v0 API.
+- [Recipes](docs/recipes/) — short, goal-oriented guides for solving specific problems.
 
-4. **Set Up a Data Feed**:
-   - Modify an agent to provide continuous updates.
-   - Allow clients to disconnect when no longer interested in results.
+## Building
 
-5. **Log an Event**:
-   - Register an event type and observe its behavior.
+Once code lands, the canonical commands match the CI workflow ([`.github/workflows/dotnet-ci.yml`](.github/workflows/dotnet-ci.yml)):
 
-6. **Configure Actions**:
-   - Add actions to agents and configure them to fire when events occur.
+```bash
+dotnet restore
+dotnet build --configuration Release
+dotnet test  --configuration Release /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=./TestResults/
+```
 
-7. **Handle Failures**:
-   - Simulate agent failures and demonstrate retry attempts.
-   - Configure alerts for retries exceeding thresholds.
+Target framework: **.NET 9.0**. There are no `.csproj` or `.sln` files yet — they will arrive with the first scaffolding work.
 
-8. **Create Custom Configuration Providers**:
-   - Implement a provider for complex rules and test it at runtime.
+## Contributing
 
----
+Contributions, design feedback, and challenges to the framing are all welcome — particularly while the design is still settling. Please open an issue before starting significant work so the direction can be discussed first. Decisions that shape the codebase are recorded as ADRs; if you are proposing something that contradicts an existing ADR, please say so explicitly.
 
-## Advanced Features
+## License
 
-### Extensibility
-
-- Users can submit their own mapping DLLs or configuration rules.
-- Strict auditing and permission handling ensure security.
-- Mocking and testing tools are built-in to verify new rules and components.
-
-### Caching
-
-- Two levels of caching:
-  1. Event provider cache for disconnected clients.
-  2. Hub agent manager cache to optimize repeated requests.
-
----
-
-## Future Enhancements
-
-- Support for user-submitted configuration providers.
-- Enhanced auditing and runtime verification for custom rules.
-- Improved scalability for large-scale deployments.
+[MIT](LICENSE)

@@ -77,6 +77,8 @@ The canonical flow for a request with streaming response:
 6. Response messages reach the original source if the source subscribed to its own correlation ID; otherwise they are simply observable by other agents and the Governor.
 7. The Governor records the full causal chain, including inbox lifecycle events.
 
+The flow above carries a hard requirement: **the causal chain of any message must be identifiable with authority from the Governor alone.** Given any message — source-injected or agent-produced — the substrate must be able to answer "what messages and agent actions cascaded from this?" and the inverse "what caused this message to exist?" Both directions are first-class queries against the Governor's audit log. Application code does not thread its own correlation context to make this work; the substrate does it. See the [Governor page](components/governor.md) for the storage and query side of this contract.
+
 Fire-and-forget is a degenerate case where no source subscribes to the correlation ID. Long-lived feeds are the same flow with no inherent termination signal. Disconnected agents are the same flow where the gap between step 3 and step 4 is hours or days rather than microseconds.
 
 ## Swap points

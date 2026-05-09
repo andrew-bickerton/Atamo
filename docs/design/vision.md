@@ -37,7 +37,7 @@ It is explicitly _not_ aimed at end users, no-code tool builders, or operations 
 
 ## Primary scenarios
 
-ATAMO is designed around five scenarios. These are the scenarios the API should make easy and the ones every design decision should be evaluated against.
+ATAMO is designed around six scenarios. These are the scenarios the API should make easy and the ones every design decision should be evaluated against.
 
 ### 1. Fire-and-forget event with multi-agent reaction
 
@@ -66,6 +66,12 @@ A source subscribes to an ongoing feed produced by one or more agents. The feed 
 An agent that is not always available — a human reviewer, a batch job, a service on a flaky network, an agent under maintenance — receives messages that wait in its inbox until it is ready. The system continues to function, audit is preserved, and other agents are unaffected. The disconnected agent processes work at its own pace and produces responses when it can.
 
 This scenario is structurally identical to the others; the inbox abstraction makes disconnection a difference of degree, not kind.
+
+### 6. Responsive client application
+
+A desktop, mobile, or rich-web client app needs to do work that does not belong on its UI thread — loading data from multiple sources, running a long search, kicking off a report. ATAMO is embedded in the app itself; the UI plays the Source role, posts a request, and stays responsive while agents fan out and stream results back. The same correlation/cancellation/streaming machinery that serves a web request handler in scenario 2 serves the UI thread here.
+
+This scenario shares plumbing with scenario 2 but sits in a materially different deployment shape: there is no server, no network, and the audience is the application developer who wants async fan-out without writing the threading and correlation themselves. It is included because "make this UI responsive" is one of the most common reasons a developer reaches for ATAMO, and because the in-process embedded shape — rather than the standalone service shape — is the one most exercised here.
 
 ## Design philosophy
 
@@ -102,6 +108,7 @@ Stated explicitly so feature requests and scope creep can be evaluated against t
 - ATAMO is not trying to be a better message bus. If you need durable queues, exactly-once semantics, or geo-replication, use a real broker underneath.
 - ATAMO is not trying to be a durable workflow engine. Long-running, crash-safe orchestration belongs to Temporal or its peers.
 - ATAMO is not trying to provide its own LLM abstractions, prompt templates, or vector storage. LLM features are use cases, built by consumers on top of the substrate.
+- ATAMO's core does not ship generic agent implementations (HTTP, SQL, email, LLM). The 2015 design imagined those in the substrate; the 2026 principle "core knows nothing about its use cases" rules them out of the core. Reusable agent patterns are still welcome — but as a separate `Atamo.Agents.Common` companion package rather than as part of the substrate. That package, and the boundary between it and the core, is part of the project-structure decision recorded in [open questions](open-questions.md).
 - ATAMO is not trying to be cross-language. Other-language clients can interact via the standalone HTTP service, but the library is .NET-native and designed for .NET ergonomics.
 - ATAMO is not aiming for no-code or low-code use. The audience is developers writing code.
 

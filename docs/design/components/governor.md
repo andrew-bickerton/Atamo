@@ -30,8 +30,9 @@ The Governor is _not_ a logging library. Logging is one thing a Governor sink ca
 The Governor records:
 
 - **Message lifecycle events.** Receive (a source submitted a message), route decision (rule providers produced these targets), enqueue (delivered to this agent's inbox), lease (this agent pulled it), ack/nack (this agent committed or rejected it), dead-letter (this message failed terminally), response (this agent emitted this).
+- **Stage timestamps.** Every lifecycle event is timestamped with sufficient precision to support per-stage latency analysis. The combination of timestamps across a message's lifetime is the canonical record of where time was spent — receive-to-route, route-to-enqueue, enqueue-to-lease (queue depth), lease-to-ack (agent processing). Operators investigating slow paths query the Governor; they do not reconstruct timing from log scrapers or application instrumentation.
 - **Principal context.** Every event is tagged with the principal on whose behalf it occurred.
-- **Causal chains.** Response messages carry their originating correlation ID; the Governor records the produced-by relationship so that the full chain can be reconstructed.
+- **Causal chains.** Response messages carry their originating correlation ID; the Governor records the produced-by relationship so the full cascade from any starting message can be reconstructed. Two questions must be answerable with authority from Governor queries — without joining application logs or inferring from timestamps: "given this message (source-injected or agent-produced), what messages and agent actions cascaded from it?" and the inverse "given this message, what caused it to exist?" Application code does not need to thread its own correlation context to make this work.
 - **Policy decisions.** When the Governor blocks an action (rate limit exceeded, agent not allowed for principal), the decision and its reasoning are recorded.
 
 The Governor enforces:
@@ -43,7 +44,8 @@ The Governor enforces:
 
 The Governor exposes:
 
-- **Queryable audit storage.** Operators and the substrate itself can query the Governor's storage to answer metadata questions: what happened, when, on whose behalf, with what outcomes. Consumers wanting to query *message content* (email bodies, LLM prompts, etc.) build their own content-storing agents; that data does not live in the Governor.
+- **Queryable audit storage.** Operators and the substrate itself can query the Governor's storage to answer metadata questions: what happened, when, on whose behalf, with what outcomes. Consumers wanting to query _message content_ (email bodies, LLM prompts, etc.) build their own content-storing agents; that data does not live in the Governor.
+- **In-flight message visibility.** Operators can ask "what is currently in flight?" — messages received but not yet routed, enqueued but not yet leased, leased but not yet acked, dead-lettered. The audit log's event sequence is sufficient to derive this; whether the Governor exposes a denormalised "current state" view or expects consumers to fold the event stream themselves is recorded as an open question (see [open-questions.md](../open-questions.md)).
 - **Subscription to live events.** Components can subscribe to Governor events as they happen, which is what enables the history-then-live pattern.
 
 ## Audit storage as a queryable resource

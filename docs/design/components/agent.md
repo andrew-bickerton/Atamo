@@ -77,6 +77,8 @@ Common patterns to honour the discipline:
 
 The substrate does not enforce any of these. It honestly exposes the at-least-once guarantee and trusts agent authors to handle it.
 
+**Dedupe is a consumer concern, not a substrate concern.** ATAMO does not put a `DedupeKey` field on the message contract. Dedupe semantics are agent-specific — a payment agent's notion of "same payment" differs from a content-store agent's notion of "same record" — and adding a single substrate-level field would imply a uniformity that does not hold. Agents that need dedupe carry their own keys in the payload and check them themselves. If multiple agents end up reimplementing the same wrapper, that pattern is a candidate for the community-contributed `Atamo.Agents.Common` package rather than for the core message contract.
+
 ## Response messages
 
 An agent processing a message may produce zero or more **response messages**. These are normal messages — they re-enter the hub and are routed by the same rule engine that routed the original.
@@ -86,7 +88,9 @@ Two properties matter:
 - **Responses carry the originating correlation ID.** This is what allows sources that subscribed to their request to receive the agent's responses, and what lets the Governor reconstruct the full causal chain.
 - **Recursion protection.** A response message will not be enqueued into the inbox of the agent that produced it, even if a routing rule would otherwise match. This is what allows responses to be observable by other agents (logging, audit, reactive workflows) without producing infinite loops.
 
-Responses can be produced incrementally. An agent that wants to stream partial results emits multiple response messages, each tagged with the same correlation ID. The hub treats them as a sequence; subscribers see them in order.
+Responses can be produced incrementally. An agent that wants to stream partial results emits multiple response messages, each tagged with the same correlation ID.
+
+**Ordering is per-producer, not global.** A single agent's responses to one correlation ID are delivered to subscribers in the order the agent emitted them. When multiple agents respond to the same correlation ID (fan-out), there is no ordering guarantee across agents — subscribers must treat the merged stream as unordered with respect to which agent produced each message. This matches what brokers reliably support and what the standalone-host streaming wire protocols (HTTP/2 + SSE, gRPC) can deliver across multiple producers. Consumers that need a globally ordered merged view can sequence by Governor timestamp at read time, but the substrate does not pre-merge for them.
 
 ## Examples of agents
 
