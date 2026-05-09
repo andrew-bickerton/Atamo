@@ -24,7 +24,7 @@ The 2015 design treated these as a single hierarchy with a "long-running agent" 
 - "Long-running" agents were structurally different from request-driven agents but shared an interface, which obscured the actual contract each was meant to honour.
 - Hybrid components — most realistically an IMAP poller that also handles `ForcePoll` messages — fit awkwardly into either pure model.
 
-The first sample (email triage) made this concrete: trying to model the email integration as a single component with both inbound polling and outbound sending forced uncomfortable choices about lifecycle, registration, and contract.
+The email-triage application — now [guide 2](../guides/02-add-llm-triage.md) — made this concrete: trying to model the email integration as a single component with both inbound polling and outbound sending forced uncomfortable choices about lifecycle, registration, and contract.
 
 This ADR resolves the "Lifecycle contract for long-running agents" entry that previously appeared in the design's open questions.
 
@@ -53,7 +53,7 @@ The Agent contract is therefore uniform and minimal: pull a message, process, op
 
 - The Agent contract becomes uniformly inbox-driven. No optional loops, no lifecycle modes, no conditional behaviour based on whether the agent is "long-running."
 - Hybrids are honest. A component playing both roles registers twice, making the two pieces of behaviour explicit and independently testable.
-- The first sample's email integration is naturally two registrations (`InboxSource` + `OutboxAgent`) rather than one component with split personality.
+- The email-triage application's email integration (guide 2) is naturally two registrations (`InboxSource` + `OutboxAgent`) rather than one component with split personality.
 - Mental model is cleaner for new contributors: "Sources push, Agents pull." No subtype to learn.
 
 **Harder:**
@@ -71,5 +71,5 @@ The Agent contract is therefore uniform and minimal: pull a message, process, op
 - [Architecture overview](../design/architecture.md) — the high-level treatment of roles.
 - [Source component](../design/components/source.md) — the Source role in detail.
 - [Agent component](../design/components/agent.md) — the Agent role in detail, including the rationale for separation.
-- [First sample](../design/first-sample.md) — the email triage scenario that forced this distinction concretely.
+- [Guide 2 — Add LLM triage and outbound replies](../guides/02-add-llm-triage.md) — the email triage scenario that forced this distinction concretely. (At the time this ADR was accepted, this guide lived at `../design/first-sample.md`; the curriculum was later restructured into `docs/guides/`.)
 - [ADR 0001](0001-rename-2015-vocabulary.md) — the renaming that introduced _Source_ as a term in the first place.

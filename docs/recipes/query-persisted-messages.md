@@ -61,7 +61,7 @@ This is the same shape as any other request/response flow in ATAMO. The store ag
 
 **Read-only agent.** If your write path and read path are sufficiently different, split them into two agents — `MessageStoreWriter` and `MessageStoreReader` — pointing at the same store. The substrate doesn't care; from its perspective these are two registrations. The split can make sense when read load and write load have different scaling characteristics, or when you want to deploy the reader separately for security reasons.
 
-**Querying live as well as historical.** The substrate's history-then-live pattern (see [`second-sample.md`](../design/second-sample.md)) is the right tool when a consumer wants past results _and_ a live feed of new ones. The store agent handles the historical part; the substrate handles the live part. Combining them cleanly is what the second sample is for.
+**Querying live as well as historical.** The substrate's history-then-live pattern (see [guide 3](../guides/03-add-history-and-live-feed.md)) is the right tool when a consumer wants past results _and_ a live feed of new ones. The store agent handles the historical part; the substrate handles the live part. Combining them cleanly is what guide 3 is for.
 
 **Pagination.** Long result sets are easier to handle with explicit cursors. A `MessageHistoryQuery` can carry a `cursor` field; the agent reads a bounded page from the store and emits a final `QueryComplete` response carrying the next cursor. The source decides whether to issue a follow-up query.
 
@@ -70,4 +70,4 @@ This is the same shape as any other request/response flow in ATAMO. The store ag
 - [Persist messages of a given type](persist-messages.md) — the write side of this pair.
 - [Agent component](../design/components/agent.md) — particularly the response-messages section.
 - [Hub component](../design/components/hub.md) — recursion protection ensures the store agent's responses don't loop back to itself.
-- [Second sample](../design/second-sample.md) — combines querying with a live feed using the history-then-live pattern.
+- [Guide 3 — Add a history-and-live review form](../guides/03-add-history-and-live-feed.md) — combines querying with a live feed using the history-then-live pattern.

@@ -11,9 +11,9 @@ Recipes are short, goal-oriented guides showing how to achieve a specific outcom
 
 ## How recipes differ from samples
 
-Samples are complete artefacts. The first sample, for instance, is a working email triage assistant — you can clone it, run it, and use it. Samples calibrate the *substrate*: each one exercises a coherent set of properties end-to-end and pressure-tests the abstractions.
+Guides (under [`docs/guides/`](../guides/)) are linear tutorials that build on each other — the first lets a developer wire up async email ingest with a UI and a database; subsequent guides add LLM triage, a history-and-live feed, and human review. They calibrate the _developer experience_: each one is a problem a real consumer might want to solve, and the curriculum demonstrates how adding capabilities to an ATAMO application is cheap.
 
-Recipes are focused snippets. Each one shows a single technique in isolation, prescriptively, in two minutes of reading. They calibrate the *developer*: a developer with a real problem reads the index, finds the recipe that matches their problem, and applies the technique without having to derive it from architecture documents.
+Recipes are focused snippets. Each one shows a single technique in isolation, prescriptively, in two minutes of reading. They calibrate the _developer_: a developer with a real problem reads the index, finds the recipe that matches their problem, and applies the technique without having to derive it from architecture documents.
 
 A useful test: if a developer says "how do I do X with ATAMO?", the answer should be either a recipe or "you can't, and here's why." Recipes are the practical layer between the design documentation and a working application.
 

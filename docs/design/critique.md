@@ -22,7 +22,7 @@ This document is mutable. Items get added when concerns surface, edited when our
 - [Design-stage concerns](#design-stage-concerns)
   - [In-process performance claim is unverified](#in-process-performance-claim-is-unverified)
   - [Premature contract specification across v0/v1/v2](#premature-contract-specification-across-v0v1v2)
-  - [v0 sample scope is too large](#v0-sample-scope-is-too-large)
+  - [Email-triage guide scope is too large](#email-triage-guide-scope-is-too-large)
   - [Audit schema lock-in risk](#audit-schema-lock-in-risk)
   - [Multi-tenancy scope creep](#multi-tenancy-scope-creep)
 - [Cosmetic concerns](#cosmetic-concerns)
@@ -55,9 +55,9 @@ These are the concerns most likely to end the project. They should be the highes
 
 **Status:** Open.
 
-**Concern.** All three samples in `docs/design/` are hypothetical. Nothing in the repository is a real product that needs ATAMO and would be built (or rebuilt) on top of it. Substrate libraries without a first-party consumer reliably ship the wrong abstractions, because nothing forces the design to confront real constraints that the author did not imagine.
+**Concern.** All four guides in `docs/guides/` are hypothetical. Nothing in the repository is a real product that needs ATAMO and would be built (or rebuilt) on top of it. Substrate libraries without a first-party consumer reliably ship the wrong abstractions, because nothing forces the design to confront real constraints that the author did not imagine.
 
-The principle "build one delightful path before generalising" addresses this for *use cases* but not for *consumers*. The samples are intended to be that one delightful path, but a sample written to validate a substrate is not the same as an application that *needs* the substrate and would be measurably worse without it.
+The principle "build one delightful path before generalising" addresses this for *use cases* but not for *consumers*. The guides are intended to be that one delightful path, but a guide written to validate a substrate is not the same as an application that *needs* the substrate and would be measurably worse without it.
 
 **Why it matters.** This is the failure mode the 2015 effort most likely hit, and the design corpus does not contain a defence against it recurring. Without a forcing user, every open question gets resolved with an answer that is reasonable in the abstract but may not survive a real workload.
 
@@ -77,7 +77,7 @@ If no such product exists or can be found, the honest answer is to scope this as
 - Routing rule evaluation with template substitution and a pluggable provider interface.
 - A fluent registration API spanning sources, agents, routing rules, governor sinks, principals, and policy.
 - Two host shapes — embedded and standalone — over HTTP and/or gRPC.
-- Three end-to-end samples (email triage, history-and-live UI, human review with claim/release/extend).
+- Four end-to-end guides (async email ingest, email triage with LLM, history-and-live UI, human review with claim/release/extend).
 - Tests at unit, integration, and end-to-end scale.
 
 For a strong solo .NET developer, this is a 9-18 month effort sustained at substantial weekly hours. Library projects of this scope routinely stop at 50-70% complete, often after the design phase has consumed more energy than expected.
@@ -86,7 +86,7 @@ For a strong solo .NET developer, this is a 9-18 month effort sustained at subst
 
 **What would resolve it.** One or more of:
 
-- A drastically reduced v0 (see [v0 sample scope](#v0-sample-scope-is-too-large) below).
+- A drastically reduced v0 (see [email-triage guide scope](#email-triage-guide-scope-is-too-large) below).
 - Co-implementers — at least one other contributor with sustained capacity.
 - An employer or sponsor whose paid time can go into ATAMO.
 - A re-scoping of ATAMO to a deliberately smaller library (for example: routing + audit only, with inbox and persistence delegated entirely to existing tools).
@@ -162,7 +162,7 @@ This is a real library, but it is a much smaller one than the eight component pa
 
 **Status:** Open.
 
-**Concern.** The README sells "route work to AI/human/code agents" but the [core-knows-nothing principle](principles.md#the-core-knows-nothing-about-its-use-cases) means the substrate ships zero AI/email/HTTP/SQL agents. Consumers must write all of those themselves. The first sample requires the consumer to provide IMAP polling, SMTP sending, a local-LLM bridge, persistence, and the orchestration glue. That is a lot of code for a substrate whose pitch is "five minutes to a working hub."
+**Concern.** The README sells "route work to AI/human/code agents" but the [core-knows-nothing principle](principles.md#the-core-knows-nothing-about-its-use-cases) means the substrate ships zero AI/email/HTTP/SQL agents. Consumers must write all of those themselves. Even guide 1 — the smaller ingest-only curriculum entry — requires the consumer to provide IMAP polling and persistence; guide 2 adds SMTP sending, a local-LLM bridge, and the orchestration glue. That is a lot of code for a substrate whose pitch is "five minutes to a working hub."
 
 The "30 seconds to working hub" phrasing in [principles.md](principles.md) is honest only in the strict sense — a hub with no agents *runs*, but it *does nothing*. The cliff between "running" and "useful" is steep, and the design does not currently address how a new user crosses it.
 
@@ -192,39 +192,39 @@ If each of these adds even a small fixed cost, the in-process latency could plau
 
 **Why it matters.** "Sensible defaults, swappable layers" loses its central argument if the default is unusable for the responsive-UI use case the design specifically claims to serve.
 
-**What would resolve it.** A benchmark, run before the v0 sample is finalised, of the full in-process happy path against a Wolverine baseline. Acceptable result: within 2-3x of Wolverine on a representative workload. If the result is 10x or worse, either the in-process implementation needs serious work or scenario 6 needs caveats in the documentation.
+**What would resolve it.** A benchmark, run before guide 1's runnable counterpart is finalised, of the full in-process happy path against a Wolverine baseline. Acceptable result: within 2-3x of Wolverine on a representative workload. If the result is 10x or worse, either the in-process implementation needs serious work or scenario 6 needs caveats in the documentation.
 
 ### Premature contract specification across v0/v1/v2
 
 **Status:** Open.
 
-**Concern.** The design corpus commits substantial contract surface across all three samples — lease extension, claim/release semantics, history-then-live with sequence markers, governor causal-chain queries, recursion protection semantics, principal-flowing-through-causal-chains — none of which has met a compiler. Each will reveal a wrinkle when it hits code. Re-doc-ing is cheap, but re-coding around docs that are now wrong is a morale tax, and the sheer amount of locked-in contract surface multiplies the chance that v0 ships late.
+**Concern.** The design corpus commits substantial contract surface across all four guides — lease extension, claim/release semantics, history-then-live with sequence markers, governor causal-chain queries, recursion protection semantics, principal-flowing-through-causal-chains — none of which has met a compiler. Each will reveal a wrinkle when it hits code. Re-doc-ing is cheap, but re-coding around docs that are now wrong is a morale tax, and the sheer amount of locked-in contract surface multiplies the chance that v0 ships late.
 
 **Why it matters.** This violates the project's own [build one delightful path before generalising](principles.md#build-one-delightful-path-before-generalising) principle. The principle is about code, but the spirit applies to contracts too — committing to v1 and v2 contract details before v0 has compiled is a form of premature generalisation.
 
-**What would resolve it.** Mark v1 and v2 contract details (history-then-live markers, claim/release/extend ergonomics, principal-chain semantics) as *provisional* in the docs, with a note that they will be revisited after v0 lands. Keep them as forcing functions for v0 design decisions, but do not treat them as committed.
+**What would resolve it.** Mark guide 3 and guide 4 contract details (history-then-live markers, claim/release/extend ergonomics, principal-chain semantics) as *provisional* in the docs, with a note that they will be revisited after v0 lands. Keep them as forcing functions for v0 design decisions, but do not treat them as committed.
 
-### v0 sample scope is too large
+### Email-triage guide scope is too large
 
-**Status:** Open.
+**Status:** Partially addressed (2026-05-10). The curriculum was restructured so that [guide 1](../guides/01-async-email-ingest.md) — async email ingest fanning out to a UI and a database — is now the v0 forcing function. The larger LLM-triage scenario originally proposed as v0 became [guide 2](../guides/02-add-llm-triage.md), positioned as a follow-on rather than a ship-or-die deliverable. The narrower concern (v0 itself is too big) is closed by that split. The original recommendation about a hard time budget for the larger scenario remains relevant if guide 2 starts taking longer than expected.
 
-**Concern.** The v0 sample as written in [first-sample.md](first-sample.md) requires: IMAP polling, SMTP sending, a local-LLM bridge, a SQLite message store, a CLI/test harness for the message-store agent, a working SQLite Governor sink, end-to-end audit chain, and recursion protection. The fallback ("console-driven Source and file-writing Agent") is acknowledged but framed as a retreat.
+**Concern.** The original v0 sample required: IMAP polling, SMTP sending, a local-LLM bridge, a SQLite message store, a CLI/test harness for the message-store agent, a working SQLite Governor sink, end-to-end audit chain, and recursion protection. The fallback ("console-driven Source and file-writing Agent") was acknowledged but framed as a retreat.
 
 **Why it matters.** A v0 sample that is large enough to be a small product in its own right is a v0 sample that ships late or not at all. The samples exist to validate the substrate; their value-as-demos is secondary. Optimising for "useful in its own right" inflates scope past what the substrate-validation goal actually requires.
 
-**What would resolve it.** Promote the fallback to be the *primary* v0. Keep the email-triage scenario as a stretch goal or as the v0.5 milestone. The substrate validation properties (Source/Agent role separation, response-as-message, content-vs-metadata split, retrievable history, recursion protection) are *all* exercised by the fallback. The polished demo can come after the substrate is real.
+**What would resolve it.** *(Done 2026-05-10.)* Promote the fallback to be the *primary* v0. Keep the email-triage scenario as a stretch goal or as the v0.5 milestone. The substrate validation properties (Source/Agent role separation, response-as-message, content-vs-metadata split, retrievable history, recursion protection) are *all* exercised by the smaller scenario. The polished demo can come after the substrate is real.
 
-If the email scenario remains the v0, write a hard time budget into [first-sample.md](first-sample.md) — "if v0 has not shipped by date X, fall back to the console scenario" — so the decision is forced rather than drifting.
+If the email-triage scenario (guide 2) starts overrunning, the original recommendation still applies: write a hard time budget into [guide 2](../guides/02-add-llm-triage.md) — "if guide 2 has not shipped by date X, freeze it and move on" — so the decision is forced rather than drifting.
 
 ### Audit schema lock-in risk
 
 **Status:** Open.
 
-**Concern.** The Governor is committed to having queryable storage with a stable enough shape that consumers can build on it ([architecture.md](architecture.md), the history-then-live commitment in v1). The actual schema is currently "driven by the persistence-layer choice" and lives in [open-questions.md](open-questions.md). Once consumers start querying against the schema, changing it is expensive — and the v1 sample is itself a consumer, so this lock-in arrives early.
+**Concern.** The Governor is committed to having queryable storage with a stable enough shape that consumers can build on it ([architecture.md](architecture.md), the history-then-live commitment in [guide 3](../guides/03-add-history-and-live-feed.md)). The actual schema is currently "driven by the persistence-layer choice" and lives in [open-questions.md](open-questions.md). Once consumers start querying against the schema, changing it is expensive — and guide 3 is itself a consumer, so this lock-in arrives early.
 
 **Why it matters.** Audit schemas that are designed by accretion tend to acquire awkward joins, ambiguous columns, and irregular cardinalities that consumers paper over and then depend on. The cost of getting it wrong on first ship is paid by every future consumer.
 
-**What would resolve it.** A dedicated ADR — likely numbered around the time the persistence-layer decision lands — that names the audit schema explicitly: tables (or document shapes), the keys that join them, the indexes consumers can rely on, and the explicit non-guarantees. The ADR should be written *before* the v1 sample is implemented, because the v1 sample is the first non-trivial consumer of the schema.
+**What would resolve it.** A dedicated ADR — likely numbered around the time the persistence-layer decision lands — that names the audit schema explicitly: tables (or document shapes), the keys that join them, the indexes consumers can rely on, and the explicit non-guarantees. The ADR should be written *before* guide 3 is implemented, because guide 3 is the first non-trivial consumer of the schema.
 
 ### Multi-tenancy scope creep
 

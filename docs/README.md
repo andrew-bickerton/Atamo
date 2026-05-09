@@ -56,9 +56,7 @@ Concrete examples of what fits this shape:
 - [Architecture](docs/design/architecture.md) — high-level overview of the system, with links to per-component detail
   - [Components](docs/design/components/) — one page per core abstraction (Hub, Source, Agent, Inbox, Governor, Routing, Host)
 - [Recipes](docs/recipes/) — short, goal-oriented guides for solving specific problems with ATAMO
-- [First sample](docs/design/first-sample.md) — the email triage scenario that drives the v0 API
-- [Second sample](docs/design/second-sample.md) — history-and-live review form, building on v0
-- [Third sample](docs/design/third-sample.md) — disconnected human-review agent, building on v1
+- [Guides](docs/guides/) — build-on-each-other tutorials covering async email ingest, LLM triage, a history-and-live review form, and disconnected human review
 - [Principles](docs/design/principles.md) — design rules the codebase should hold itself to
 - [Open questions](docs/design/open-questions.md) — decisions still in flight
 - [Critique](docs/design/critique.md) — register of concerns about the design and the project around it

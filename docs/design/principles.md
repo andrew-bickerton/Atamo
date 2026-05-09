@@ -50,7 +50,7 @@ The "compose, don't subsume" principle applies here too. There are excellent exi
 
 Pluggability that is designed up front, before any single use case feels good, almost always produces an architecture that is coherent on paper and tedious in code. ATAMO will get one scenario right, then a second, and let the swap points emerge from the differences between them.
 
-The first sample exists for exactly this reason. Generalisation that is not driven by a real second use case is speculative and almost always wrong. When a third scenario lands and a swap point is still cleanly factored, that is when it has earned its place.
+The first guide exists for exactly this reason. Generalisation that is not driven by a real second use case is speculative and almost always wrong. When a third scenario lands and a swap point is still cleanly factored, that is when it has earned its place.
 
 ## Every agent contract assumes remote, even when in-process
 
@@ -76,7 +76,7 @@ This principle directly shapes the inbox contract: it is the rough intersection 
 
 ## API ergonomics are a feature, not a finishing touch
 
-For a developer-facing library, the README and the first sample are the product. A consumer who finds the API tedious in the first ten minutes will not stay long enough to find the depth.
+For a developer-facing library, the README and the first guide are the product. A consumer who finds the API tedious in the first ten minutes will not stay long enough to find the depth.
 
 Concretely this means: typed messages with `record` types; `IAsyncEnumerable<T>` for streams; minimal-API-style fluent registration; source generators where they reduce boilerplate without hiding intent; clear async ownership; cancellation tokens propagated rigorously; no surprise allocations on hot paths. The library should feel like it was written in 2026, because it was.
 

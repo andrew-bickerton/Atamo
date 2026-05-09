@@ -11,7 +11,7 @@ The solution layout (per [ADR 0004](docs/adr/0004-initial-project-layout.md)):
 - [`src/Atamo.Abstractions/`](src/Atamo.Abstractions/) — interfaces, message records, contracts. No logic yet.
 - [`src/Atamo/`](src/Atamo/) — default implementations + fluent builder API. No logic yet; references `Atamo.Abstractions`.
 - [`tests/Atamo.Tests/`](tests/Atamo.Tests/) — xUnit. Currently holds a single passing smoke test (`SmokeTests.TestInfrastructure_Runs`) so `dotnet test` has something to run.
-- [`samples/Atamo.Samples.Hello/`](samples/Atamo.Samples.Hello/) — minimal console app referenced by [.vscode/launch.json](.vscode/launch.json). Scope is intentionally limited to verifying the toolchain (F5 in VS Code, `dotnet run`); it is **not** a usage sample. The v0 usage sample remains the email-triage scenario in `docs/design/first-sample.md`. ADR 0004 originally deferred all samples; this one was added later as a tooling-verification target only and should be removed or supplanted when the email-triage sample lands.
+- [`samples/Atamo.Samples.Hello/`](samples/Atamo.Samples.Hello/) — minimal console app referenced by [.vscode/launch.json](.vscode/launch.json). Scope is intentionally limited to verifying the toolchain (F5 in VS Code, `dotnet run`); it is **not** a usage sample. The usage curriculum lives under [`docs/guides/`](docs/guides/) and starts with [guide 1](docs/guides/01-async-email-ingest.md). ADR 0004 originally deferred all samples; this one was added later as a tooling-verification target only and should be removed or supplanted when the first guide's runnable counterpart lands.
 
 Cross-cutting infrastructure at the repo root:
 

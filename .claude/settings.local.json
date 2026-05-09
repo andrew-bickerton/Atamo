@@ -16,7 +16,8 @@
       "PowerShell(dotnet build --configuration Debug)",
       "PowerShell(dotnet run --project samples/Atamo.Samples.Hello --no-build)",
       "PowerShell(dotnet build --configuration Release)",
-      "Bash(git check-ignore *)"
+      "Bash(git check-ignore *)",
+      "PowerShell(dotnet build --configuration Release --no-restore 2>&1)"
     ]
   }
 }

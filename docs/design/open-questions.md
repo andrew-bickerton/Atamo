@@ -63,7 +63,7 @@ The principle "compose, don't subsume" pulls hard toward integration rather than
 
 The 2015 design called for two caches: one at the message-source layer for disconnected clients, one inside the hub for in-flight request coalescing.
 
-The coalescing cache is straightforward _to implement_: if two requests with the same key arrive while one is in flight, the second waits on the first. Standard pattern, on top of `ConcurrentDictionary` and `TaskCompletionSource`. The harder question is _when_ it lands. Neither v0 (single-LLM-call email triage) nor v1 (history-and-live review form) exercises it. The current bias is to defer until a real consumer requirement forces the question, in line with the "build one delightful path before generalising" principle. If it ships earlier as a "free" feature it almost certainly ships in the wrong shape. To be revisited when a third sample or a real consumer naturally produces duplicate in-flight requests for the same data.
+The coalescing cache is straightforward _to implement_: if two requests with the same key arrive while one is in flight, the second waits on the first. Standard pattern, on top of `ConcurrentDictionary` and `TaskCompletionSource`. The harder question is _when_ it lands. Neither guide 2 (single-LLM-call email triage) nor guide 3 (history-and-live review form) exercises it. The current bias is to defer until a real consumer requirement forces the question, in line with the "build one delightful path before generalising" principle. If it ships earlier as a "free" feature it almost certainly ships in the wrong shape. To be revisited when a later guide or a real consumer naturally produces duplicate in-flight requests for the same data.
 
 The disconnected-client cache is harder because it needs to outlive process restarts and have a configurable keep-alive. This overlaps significantly with the persistence swap point and may be subsumed by it — see [Deferred-retrieval keep-alive and TTL](#deferred-retrieval-keep-alive-and-ttl) for the related TTL question. The decision is whether it is a separate concern or an aspect of persistence.
 
@@ -77,7 +77,7 @@ Candidates:
 - **Separate stores behind a unified query interface.** Audit might be append-only on commodity storage; inbox queues might want different durability characteristics; deferred results might want different retention policies. Unified query layer in front.
 - **Separate concerns entirely.** Each subsystem chooses its own store; query agents read from each separately. Most flexible, most complex.
 
-The first sample's message-store agent owning its own store (separate from the Governor's audit storage) settles a small version of this question (content storage is a consumer concern, queryable by the same agent that wrote it). The full answer for the substrate's own storage — Governor audit, inbox state, deferred-retrieval results — waits until deferred retrieval (scenario 3) and the inbox swap-point are both built out.
+Guide 2's message-store agent owning its own store (separate from the Governor's audit storage) settles a small version of this question (content storage is a consumer concern, queryable by the same agent that wrote it). The full answer for the substrate's own storage — Governor audit, inbox state, deferred-retrieval results — waits until deferred retrieval (vision scenario 3) and the inbox swap-point are both built out.
 
 ## In-flight tracking query interface
 
@@ -91,7 +91,7 @@ Candidates:
 
 Likely answer is "denormalised view, regenerable from the event log if it gets out of sync." But the contract — query parameters, indexed dimensions, freshness guarantees, what counts as "in flight" — needs to be settled deliberately. The 2015 design named this as a controller-facing capability ("maintain list of inflight messages") without specifying the interface; getting the interface right is what makes this a load-bearing feature rather than a nice-to-have.
 
-To be settled when the Governor's first concrete query surface lands, alongside or shortly after the v0 sample.
+To be settled when the Governor's first concrete query surface lands, alongside or shortly after guide 1's runnable counterpart.
 
 ## Deferred-retrieval keep-alive and TTL
 
@@ -103,7 +103,7 @@ Vision scenario 3 (request with deferred retrieval) commits to "configurable kee
 - **Relationship with audit retention.** The Governor retains audit events for some period; the deferred-retrieval result store retains payloads for some period. These are different things with different lifetimes — the audit event for "this request was issued" can outlive the payload by orders of magnitude. Need to make the distinction explicit so consumers don't conflate them.
 - **Storage location.** Does the deferred-retrieval cache share storage with the inbox? With the Governor? With application-level persistence? Overlaps with the [Governor storage](#governor-storage-and-general-persistence--same-store) question.
 
-To be settled when scenario 3 (deferred retrieval) is built out — likely the third sample.
+To be settled when vision scenario 3 (deferred retrieval) is built out — likely a guide that follows guide 4.
 
 ## Resumability semantics for the history-then-live pattern
 
@@ -115,7 +115,7 @@ Open sub-questions:
 - **Retention guarantees.** A subscriber that has been disconnected for a week may reconnect with a marker that has aged out of storage. The contract for what happens then — error, fallback to oldest available, fallback to "now" — needs to be explicit and configurable.
 - **Ordering across shards.** If messages are partitioned (per-principal, per-type, per-tenant), is global ordering guaranteed, or is the consumer's marker per-shard? Probably per-shard, but this needs to be explicit.
 
-The second sample is the forcing function for getting these right.
+Guide 3 is the forcing function for getting these right.
 
 ## Inbox policy scope for v0
 
@@ -137,12 +137,12 @@ Worth a dedicated ADR when the inbox implementation lands.
 
 ## Lease extension and explicit release
 
-The v2 sample (human review) surfaces two operations that the v0 inbox contract does not yet name:
+Guide 4 (disconnected human review) surfaces two operations that the v0 inbox contract does not yet name:
 
 - **Lease extension.** A consumer that is partway through a long-running item should be able to extend its lease ("I'm still working on this") rather than letting the visibility timeout fire and the message redeliver. Every major broker supports this; ATAMO's contract should too.
 - **Explicit release.** A consumer that has claimed an item but cannot complete it (mistaken claim, end-of-shift, deferring to a colleague) should be able to release it back to the queue immediately rather than waiting for the timeout.
 
-Likely answer: both are first-class operations on the inbox contract, exposed as `ExtendLease` and `Release` alongside `Ack` and `Nack`. Worth confirming when the v2 sample forces the question concretely.
+Likely answer: both are first-class operations on the inbox contract, exposed as `ExtendLease` and `Release` alongside `Ack` and `Nack`. Worth confirming when guide 4 forces the question concretely.
 
 ## Redaction in content-storing agents
 

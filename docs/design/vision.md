@@ -117,7 +117,7 @@ Stated explicitly so feature requests and scope creep can be evaluated against t
 For the v0 milestone:
 
 - A developer can `dotnet add package` ATAMO into a console app and have a working in-process hub in under five minutes.
-- The first sample (an inbound-email triage scenario combining an email integration, a local-LLM agent, and a message-store agent) runs end-to-end and is genuinely useful in its own right.
+- [Guide 1](../guides/01-async-email-ingest.md) (an inbound-email scenario fanning out to a UI and a local store) runs end-to-end and is genuinely useful in its own right. [Guide 2](../guides/02-add-llm-triage.md) — the LLM-triage extension — is a stretch goal for the v0 milestone.
 - The agent contract has been pressure-tested against at least two structurally different agents (one fast in-process, one slow disconnected) and survives without special cases.
 - The Governor produces a complete, queryable audit trail of every message, route decision, agent action, and response.
 

@@ -59,7 +59,7 @@ Two source projects, one test project. No samples, no standalone host, no compan
 
 | Item | Reason for deferral |
 |---|---|
-| `samples/` directory | The email-triage sample is the v0 forcing function ([`first-sample.md`](../design/first-sample.md)). It is substantial work that earns its own milestone. A "hello-agent" placeholder before that would just be code-shaped noise. |
+| `samples/` directory | The email-ingest tutorial is the v0 forcing function ([guide 1](../guides/01-async-email-ingest.md)). Its runnable counterpart is substantial work that earns its own milestone. A "hello-agent" placeholder before that would just be code-shaped noise. (Note: at the time this ADR was accepted, the tutorial layout placed all samples under `docs/design/first-sample.md`; the curriculum was later restructured into `docs/guides/`. The decision the ADR records — defer the runnable sample — stands.) |
 | `Atamo.Hosting` (separate registration glue package) | Splittable later. v0 has one default for every interface; carving registration into its own package is premature infrastructure. |
 | `Atamo.Server` (standalone HTTP/gRPC host) | Per [`host.md`](../design/components/host.md), the standalone host adds no primitives the embedded library does not have. Wait until the embedded API is stable enough that a thin wrapper is genuinely thin. |
 | `Atamo.Agents.Common` companion package | Companion package, not core. Create when there is an actual reusable pattern to extract — not before. The placeholder for it lives in the [non-goals of `vision.md`](../design/vision.md#non-goals) and in agent.md's note on dedupe wrappers. |

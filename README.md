@@ -64,7 +64,7 @@ The authoritative design lives under [`docs/`](docs/):
 - [Principles](docs/design/principles.md) — the rules the codebase holds itself to.
 - [Open questions](docs/design/open-questions.md) — decisions still in flight.
 - [ADRs](docs/adr/) — architectural decisions, dated and numbered.
-- [First sample](docs/design/first-sample.md) — the email-triage scenario that drives the v0 API.
+- [Guides](docs/guides/) — build-on-each-other tutorials starting with async email ingest, then adding LLM triage, a history-and-live feed, and human-in-the-loop review.
 - [Recipes](docs/recipes/) — short, goal-oriented guides for solving specific problems.
 
 ## Building
