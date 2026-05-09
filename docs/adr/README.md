@@ -51,6 +51,7 @@ ADRs are immutable once accepted. To change a decision, write a new ADR that sup
 | [0001](0001-rename-2015-vocabulary.md) | Rename 2015 component vocabulary | Accepted |
 | [0002](0002-source-and-agent-as-roles.md) | Source and Agent as roles, not types | Accepted |
 | [0003](0003-per-agent-inboxes.md) | Per-agent inboxes with industry-standard semantics | Accepted |
+| [0004](0004-initial-project-layout.md) | Initial project layout | Accepted |
 
 New ADRs should be added to this index in order.
 

@@ -19,7 +19,6 @@ These are decisions that have been deliberately deferred. Each is recorded here 
 - [Wire protocol for the standalone host](#wire-protocol-for-the-standalone-host)
 - [Persistence layer choice](#persistence-layer-choice)
 - [How ATAMO interacts with existing buses when one is present](#how-atamo-interacts-with-existing-buses-when-one-is-present)
-- [Project layout and solution structure](#project-layout-and-solution-structure)
 
 ## How user-submitted code is isolated
 
@@ -184,18 +183,3 @@ SQLite is currently leading on grounds of "works without infrastructure," but Ma
 If a consumer brings Wolverine or MassTransit, ATAMO should compose with it cleanly rather than fighting it. The shape of that integration is undecided. Candidates: ATAMO uses the bus as its transport swap-out; ATAMO sits in front of the bus and delegates dispatch; ATAMO sits behind the bus as one consumer among many.
 
 Different consumers will want different shapes. The integration should probably support more than one mode, with the default being the simplest (transport swap-out).
-
-## Project layout and solution structure
-
-The 2015 design committed to a specific solution layout: `Atamo.Hub` (core library), `Atamo.SDK` (interfaces for agent and provider authors), `Atamo.Service` (standalone REST host), `Atamo.Persistence` (storage abstractions), `Atamo.Agents.Samples` (sample agent implementations). The 2026 design has not yet revisited that layout, and the moment the first `dotnet new` runs, whatever shape lands becomes de-facto architecture.
-
-Decisions to make before scaffolding:
-
-- **Where the public API lives.** Single `Atamo` package, or split into `Atamo.Abstractions` (interfaces) + `Atamo.Hub` (default implementations) + `Atamo.Hosting` (DI/registration glue), in line with current .NET conventions?
-- **Where swap-point implementations live.** Each non-default implementation (`Atamo.Inbox.RabbitMQ`, `Atamo.Persistence.Marten`, `Atamo.Governor.OpenTelemetry`) as its own NuGet package, so consumers pull only what they use? This is the dominant .NET pattern and almost certainly the right answer, but worth committing.
-- **Where the standalone host lives.** A separate executable project (`Atamo.Host` or `Atamo.Server`) that depends on the embedded library; not a separate codebase. Confirms the principle that the standalone host adds no primitives the embedded library does not have.
-- **Where samples live.** First-sample (email triage), second-sample (history-and-live), third-sample (disconnected human review) each as their own runnable project under a `samples/` directory? Mixed in with tests, or distinct?
-- **`Atamo.Agents.Common` companion package.** Reusable agent base classes and patterns (idempotency wrappers, retry envelopes, cancellation conventions) live here, _outside_ the core. The "core knows nothing about its use cases" principle keeps this out of the substrate; the "compose, don't subsume" principle keeps it from drifting toward "yet another framework." The package should be optional, separately versioned, and replaceable.
-- **Tests.** Unit, integration, and end-to-end tests mapped onto the project structure. Probably `tests/Atamo.Tests`, `tests/Atamo.IntegrationTests`, `tests/Atamo.SampleApp.Tests` or similar.
-
-This becomes an ADR (likely numbered 0004) the first time scaffolding is proposed. Until then, the question is recorded here so the decision is made deliberately rather than by accident.
